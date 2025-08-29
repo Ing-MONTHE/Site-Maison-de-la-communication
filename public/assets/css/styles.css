@@ -1,3 +1,9 @@
+/* Import de la police Poppins depuis Google Fonts
+   - Poids inclus: 300, 400, 500, 600, 700
+   - La police est utilisée via font-family dans le body
+*/
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
 :root {
   --brand: #0b7c66;
   --brand-2: #0b967c;
@@ -49,7 +55,7 @@ p { text-align: justify; }
 .btn-card { width: 100%; text-align: center; }
 
 /* Hero */
-.hero { position: relative; background: url('Images/Image de fond.png') center/cover no-repeat; color: #fff; min-height: 56vh; display: grid; place-items: center; }
+.hero { position: relative; background: url('../../../Images/Image de fond.png') center/cover no-repeat; color: #fff; min-height: 56vh; display: grid; place-items: center; }
 .hero .overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.55), rgba(0,0,0,0.25)); }
 .hero-content { position: relative; text-align: center; padding: 60px 0; }
 .hero h1 { margin: 0 0 12px; font-size: clamp(26px, 4vw, 44px); line-height: 1.15; }
