@@ -1,0 +1,13 @@
+/* Styles spécifiques à la page d'inscription */
+
+.auth { min-height: 100vh; display: grid; place-items: center; background: linear-gradient(135deg, #0b7c66 0%, #0b967c 100%); padding: 24px; }
+.auth-card { width: min(520px, 92%); background: #fff; border-radius: 16px; padding: 28px; box-shadow: 0 18px 50px rgba(0,0,0,0.15); }
+.auth-card h1 { margin: 0 0 14px; font-size: 24px; color: #1e2a36; }
+.auth-card label { display: block; font-weight: 600; margin: 12px 0 6px; }
+.auth-card input, .auth-card select { width: 100%; padding: 12px 14px; border: 1px solid #d3dbe5; border-radius: 10px; outline: none; font-family: inherit; }
+.auth-card .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width:720px){ .auth-card .row { grid-template-columns: 1fr; } }
+.auth-card .actions { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; gap: 10px; }
+.auth-card .btn { width: 100%; text-align: center; }
+
+
