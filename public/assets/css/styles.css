@@ -52,7 +52,7 @@ p { text-align: justify; }
 .btn-light { background: #ffffff; color: var(--brand); border: 1px solid rgba(11,150,124,0.25); }
 .btn-outline { background: transparent; color: var(--brand); border: 1px solid var(--brand); box-shadow: none; }
 .btn-sm { padding: 8px 12px; font-size: 14px; border-radius: 6px; }
-.btn-card { width: 100%; text-align: center; }
+.btn-card { width: 100%; text-align: center; margin-top: auto; flex-shrink: 0; }
 
 /* Hero */
 .hero { position: relative; background: url('../../../Images/Image de fond.png') center/cover no-repeat; color: #fff; min-height: 56vh; display: grid; place-items: center; }
@@ -76,12 +76,12 @@ p { text-align: justify; }
 /* Modules */
 .modules { padding: 70px 0; }
 .section-title { text-align: center; margin: 0 0 26px; font-size: clamp(22px, 3vw, 34px); color: var(--dark); }
-.cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; }
-.card { background: #f2f5f7; border-radius: 16px; padding: 24px; box-shadow: var(--shadow); display: flex; flex-direction: column; align-items: stretch; }
-.card-illustration { display: grid; place-items: center; margin-bottom: 14px; }
+.cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; align-items: stretch; }
+.card { background: #f2f5f7; border-radius: 16px; padding: 24px; box-shadow: var(--shadow); display: flex; flex-direction: column; height: 100%; }
+.card-illustration { display: grid; place-items: center; margin-bottom: 14px; flex-shrink: 0; }
 .card-illustration img { width: clamp(64px, 10vw, 88px); height: auto; object-fit: contain; filter: saturate(1.1); }
-.card h3 { margin: 6px 0 10px; font-size: 22px; color: var(--dark); text-align: center; }
-.card-links { list-style: none; padding: 0; margin: 0 0 16px; text-align: center; }
+.card h3 { margin: 6px 0 10px; font-size: 22px; color: var(--dark); text-align: center; flex-shrink: 0; }
+.card-links { list-style: none; padding: 0; margin: 0 0 16px; text-align: center; flex-grow: 1; }
 .card-links li { margin: 8px 0; }
 .card-links a { color: var(--brand); text-decoration: none; }
 .card-links a:hover { text-decoration: underline; }

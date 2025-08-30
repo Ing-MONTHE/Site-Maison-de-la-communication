@@ -84,7 +84,7 @@
             <li><a href="#">Podcasts et émissions</a></li>
             <li><a href="#">Grille des programmes</a></li>
           </ul>
-          <a class="btn btn-card" href="#">En savoir plus</a>
+          <a class="btn btn-card" href="app/views/modules/rve.php">En savoir plus</a>
         </article>
 
         <article class="card">
@@ -98,7 +98,7 @@
             <li><a href="#">Devis et commandes</a></li>
             <li><a href="#" id="open-payment">Parle Seigneur (payant)</a></li>
           </ul>
-          <a class="btn btn-card" href="#">En savoir plus</a>
+          <a class="btn btn-card" href="app/views/modules/imprimerie.php">En savoir plus</a>
         </article>
 
         <article class="card">
@@ -111,7 +111,7 @@
             <li><a href="#">Référencement (SEO)</a></li>
             <li><a href="#">Emailing & campagnes</a></li>
           </ul>
-          <a class="btn btn-card" href="#">En savoir plus</a>
+          <a class="btn btn-card" href="app/views/modules/sercom.php">En savoir plus</a>
         </article>
 
         <article class="card">
