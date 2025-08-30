@@ -19,8 +19,8 @@
       <input type="password" id="password" name="password" placeholder="••••••••" required />
 
       <div class="actions">
-        <a href="index.php" class="link">← Retour à l’accueil</a>
-        <a href="index.php?controller=auth&action=registerForm" class="link">Créer un compte</a>
+        <a href="../../../index.html" class="link">← Retour à l'accueil</a>
+        <a href="register.php" class="link">Créer un compte</a>
       </div>
 
       <div style="margin-top:14px">

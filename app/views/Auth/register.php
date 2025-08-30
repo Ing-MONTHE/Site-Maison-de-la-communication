@@ -33,7 +33,7 @@
       <input type="password" id="confirm" name="confirm" minlength="8" required />
 
       <div class="actions">
-        <a href="index.php?controller=auth&action=login" class="link">Déjà un compte ? Se connecter →</a>
+        <a href="login.php" class="link">Déjà un compte ? Se connecter →</a>
       </div>
 
       <div style="margin-top:14px">
