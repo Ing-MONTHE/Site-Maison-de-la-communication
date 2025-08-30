@@ -19,7 +19,7 @@
       <input type="password" id="password" name="password" placeholder="••••••••" required />
 
       <div class="actions">
-        <a href="../../../index.html" class="link">← Retour à l'accueil</a>
+        <a href="../../../index.php" class="link">← Retour à l'accueil</a>
         <a href="register.php" class="link">Créer un compte</a>
       </div>
 

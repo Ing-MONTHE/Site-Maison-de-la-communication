@@ -23,7 +23,7 @@
         <a href="#blog">Blog</a>
         <a href="#contact">Contact</a>
         <a class="btn btn-outline" href="app/views/Auth/login.php">Se connecter</a>
-        <a class="btn" href="app/views/Auth/register.php">S’inscrire</a>
+        <a class="btn" href="app/views/Auth/register.php">S'inscrire</a>
       </nav>
       <button class="nav-toggle" aria-label="Ouvrir le menu">☰</button>
     </div>
@@ -162,17 +162,17 @@
         <article class="post">
           <h3>Nouvelle grille des programmes RVE</h3>
           <p>Découvrez nos émissions phares et nos rendez‑vous spirituels quotidiens.</p>
-          <a class="link" href="#">Lire l’article</a>
+          <a class="link" href="#">Lire l'article</a>
         </article>
         <article class="post">
           <h3>Ouverture du service de commandes en ligne</h3>
           <p>Imprimez vos supports en quelques clics avec un accompagnement professionnel.</p>
-          <a class="link" href="#">Lire l’article</a>
+          <a class="link" href="#">Lire l'article</a>
         </article>
         <article class="post">
           <h3>Atelier communication pour paroisses</h3>
           <p>Formez vos équipes à la narration et à la création de contenus inspirants.</p>
-          <a class="link" href="#">Lire l’article</a>
+          <a class="link" href="#">Lire l'article</a>
         </article>
       </div>
     </div>
@@ -207,7 +207,7 @@
       <div>
         <h4>Administration</h4>
         <a class="btn btn-outline" href="app/views/Auth/login.php">Se connecter</a>
-        <a class="btn" style="margin-left:8px;margin-top:8px" href="app/views/Auth/register.php">S’inscrire</a>
+        <a class="btn" style="margin-left:8px;margin-top:8px" href="app/views/Auth/register.php">S'inscrire</a>
         <div class="footer-socials">
           <a class="social" href="#" aria-label="YouTube" title="YouTube">▶</a>
           <a class="social" href="#" aria-label="Facebook" title="Facebook">f</a>
@@ -239,7 +239,7 @@
       e.preventDefault();
       const method = (new FormData(e.target)).get('method');
       const phone = (new FormData(e.target)).get('phone');
-      alert(`Commande enregistrée. Méthode: ${method} — Téléphone: ${phone}. L’intégration de paiement sera ajoutée ultérieurement.`);
+      alert(`Commande enregistrée. Méthode: ${method} — Téléphone: ${phone}. L'intégration de paiement sera ajoutée ultérieurement.`);
       paymentModal.classList.remove('open');
       paymentModal.setAttribute('aria-hidden','true');
       e.target.reset();
@@ -247,5 +247,3 @@
   </script>
 </body>
 </html>
-
-

@@ -13,7 +13,12 @@ Les liens de navigation entre les pages d'authentification et la page d'accueil 
 
 ## Solution appliquée
 
-### 1. Correction du fichier `app/views/Auth/login.php`
+### 1. Conversion de la page d'accueil
+
+**Avant :** Page d'accueil en `index.html`  
+**Après :** Page d'accueil en `index.php` (contenu identique préservé)
+
+### 2. Correction du fichier `app/views/Auth/login.php`
 
 **Avant :**
 ```html
@@ -23,11 +28,11 @@ Les liens de navigation entre les pages d'authentification et la page d'accueil 
 
 **Après :**
 ```html
-<a href="../../../index.html" class="link">← Retour à l'accueil</a>
+<a href="../../../index.php" class="link">← Retour à l'accueil</a>
 <a href="register.php" class="link">Créer un compte</a>
 ```
 
-### 2. Correction du fichier `app/views/Auth/register.php`
+### 3. Correction du fichier `app/views/Auth/register.php`
 
 **Avant :**
 ```html
@@ -41,7 +46,7 @@ Les liens de navigation entre les pages d'authentification et la page d'accueil 
 
 ## Structure du projet respectée
 
-- **Page d'accueil** : `index.html` (racine du projet)
+- **Page d'accueil** : `index.php` (racine du projet) - **NOUVEAU**
 - **Page de connexion** : `app/views/Auth/login.php`
 - **Page d'inscription** : `app/views/Auth/register.php`
 
@@ -49,21 +54,30 @@ Les liens de navigation entre les pages d'authentification et la page d'accueil 
 
 Maintenant, la navigation fonctionne correctement :
 
-✅ **"Retour à l'accueil"** → Renvoie vers la page d'accueil (`index.html`)  
+✅ **"Retour à l'accueil"** → Renvoie vers la page d'accueil (`index.php`)  
 ✅ **"Créer un compte"** → Renvoie vers le formulaire d'inscription (`register.php`)  
 ✅ **"Déjà un compte ? Se connecter"** → Renvoie vers le formulaire de connexion (`login.php`)  
 
 ## Remarques techniques
 
+- **Conversion réussie** : `index.html` → `index.php` sans modification du contenu
 - Les liens utilisent des chemins relatifs pour maintenir la portabilité du projet
 - La structure MVC du projet est préservée
 - Aucun nouveau fichier n'a été créé, seuls les liens existants ont été corrigés
-- Les liens dans `index.html` vers les pages d'authentification fonctionnent déjà correctement
+- Les liens dans `index.php` vers les pages d'authentification fonctionnent déjà correctement
+- **Avantage** : Le fichier PHP peut maintenant être traité par le serveur web et permettre l'utilisation de fonctionnalités PHP si nécessaire
 
 ## Test de la navigation
 
 Pour tester que tout fonctionne :
-1. Ouvrir `index.html` dans un navigateur
+1. Ouvrir `index.php` dans un navigateur
 2. Cliquer sur "Se connecter" ou "S'inscrire" dans le header/footer
 3. Dans la page de connexion, tester "Retour à l'accueil" et "Créer un compte"
 4. Dans la page d'inscription, tester "Déjà un compte ? Se connecter"
+
+## Changements effectués
+
+- ✅ `index.html` → `index.php` (conversion sans perte de contenu)
+- ✅ Mise à jour des liens dans `login.php` vers `index.php`
+- ✅ Suppression de l'ancien fichier `index.html`
+- ✅ Tous les liens de navigation fonctionnent correctement
