@@ -1,3 +1,8 @@
+<?php
+session_start();
+require_once 'config/Auth.php';
+use Config\Auth;
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -6,8 +11,26 @@
   <title>Maison Catholique de la Communication - Accueil</title>
   <link rel="stylesheet" href="public/assets/css/styles.css" />
 </head>
-<body>
+  <body>
   
+  <!-- Messages de notification -->
+  <?php if (isset($_GET['success'])): ?>
+  <div class="notification success">
+    <div class="container">
+      <p><?= htmlspecialchars($_GET['success']) ?></p>
+      <button class="close-notification" onclick="this.parentElement.parentElement.remove()">×</button>
+    </div>
+  </div>
+  <?php endif; ?>
+  
+  <?php if (isset($_GET['error'])): ?>
+  <div class="notification error">
+    <div class="container">
+      <p><?= htmlspecialchars($_GET['error']) ?></p>
+      <button class="close-notification" onclick="this.parentElement.parentElement.remove()">×</button>
+    </div>
+  </div>
+  <?php endif; ?>
 
   <!-- Header principal -->
   <header class="site-header">
@@ -22,8 +45,16 @@
         <a href="#modules">Expertises</a>
         <a href="#blog">Blog</a>
         <a href="#contact">Contact</a>
+        <?php if (Auth::isPublic()): ?>
         <a class="btn btn-outline" href="app/views/Auth/login.php">Se connecter</a>
         <a class="btn" href="app/views/Auth/register.php">S'inscrire</a>
+        <?php elseif (Auth::isAuthenticated()): ?>
+        <a class="btn btn-outline" href="app/views/Auth/profile.php">Mon profil</a>
+        <a class="btn" href="app/views/Auth/logout.php">Déconnexion</a>
+        <?php elseif (Auth::isAdmin()): ?>
+        <a class="btn btn-outline" href="app/views/admin/">Administration</a>
+        <a class="btn" href="app/controlleurs/AdminController.php?action=logout">Déconnexion</a>
+        <?php endif; ?>
       </nav>
       <button class="nav-toggle" aria-label="Ouvrir le menu">☰</button>
     </div>
@@ -37,8 +68,12 @@
       <p>Là où la technologie rencontre la spiritualité, nous créons des ponts entre les cœurs et propageons la Bonne Nouvelle à travers tous les médias.</p>
       <div class="cta-group">
         <a class="btn" href="#modules">Découvrir nos modules</a>
-        <a class="btn btn-light" href="app/views/Auth/login.php">Accès administration</a>
+        <?php if (Auth::canAccessAdmin()): ?>
+        <a class="btn btn-light" href="app/views/admin/">Accès administration</a>
+        <?php endif; ?>
+        <?php if (Auth::isPublic()): ?>
         <a class="btn" href="app/views/Auth/register.php">Créer un compte</a>
+        <?php endif; ?>
       </div>
     </div>
   </section>
