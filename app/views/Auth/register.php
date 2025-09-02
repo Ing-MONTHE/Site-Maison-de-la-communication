@@ -9,19 +9,11 @@
 </head>
 <body>
   <div class="auth">
-    <form class="auth-card" action="index.php?controller=auth&action=register" method="post">
+    <form class="auth-card" action="../../controlleurs/AuthController.php?action=register" method="post">
       <h1>Créer un compte</h1>
 
-      <div class="row">
-        <div>
-          <label for="lastname">Nom</label>
-          <input type="text" id="lastname" name="lastname" required />
-        </div>
-        <div>
-          <label for="firstname">Prénom</label>
-          <input type="text" id="firstname" name="firstname" required />
-        </div>
-      </div>
+      <label for="username">Nom d'utilisateur</label>
+      <input type="text" id="username" name="username" required />
 
       <label for="email">E-mail</label>
       <input type="email" id="email" name="email" required />
@@ -29,8 +21,8 @@
       <label for="password">Mot de passe</label>
       <input type="password" id="password" name="password" minlength="8" required />
 
-      <label for="confirm">Confirmer le mot de passe</label>
-      <input type="password" id="confirm" name="confirm" minlength="8" required />
+      <label for="confirm_password">Confirmer le mot de passe</label>
+      <input type="password" id="confirm_password" name="confirm_password" minlength="8" required />
 
       <div class="actions">
         <a href="login.php" class="link">Déjà un compte ? Se connecter →</a>
@@ -40,8 +32,8 @@
         <button class="btn" type="submit">S’inscrire</button>
       </div>
 
-      <?php if (!empty($error)) : ?>
-        <p class="error"><?= htmlspecialchars($error) ?></p>
+      <?php if (!empty($_GET['error'])) : ?>
+        <p class="error"><?= htmlspecialchars($_GET['error']) ?></p>
       <?php endif; ?>
     </form>
   </div>

@@ -84,12 +84,12 @@ class AdminController {
         $_SESSION['admin_username'] = $user['username'];
         $_SESSION['admin_role'] = $user['role'];
         
-        header('Location: ../views/admin/dashboard.php');
+        header('Location: /Site-Maison-de-la-communication/app/views/admin/dashboard.php');
     }
     
     private function logout() {
         session_destroy();
-        header('Location: ../views/admin/login.php');
+        header('Location: /Site-Maison-de-la-communication/app/views/admin/login.php');
     }
     
     private function createPublication() {

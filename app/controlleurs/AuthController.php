@@ -32,21 +32,21 @@ class AuthController {
     }
     
     private function login() {
-        $username = $_POST['username'] ?? '';
+        $identifier = $_POST['email'] ?? '';
         $password = $_POST['password'] ?? '';
         
-        if (empty($username) || empty($password)) {
-            header('Location: ../views/Auth/login.php?error=Identifiants manquants');
+        if (empty($identifier) || empty($password)) {
+            header('Location: /Site-Maison-de-la-communication/app/views/Auth/login.php?error=Identifiants manquants');
             return;
         }
         
-        // Recherche de l'utilisateur (visiteur ou personnel, pas admin)
-        $stmt = $this->db->prepare("SELECT * FROM users WHERE username = ? AND role IN ('visiteur', 'visiteur_auth', 'personnel')");
-        $stmt->execute([$username]);
+        // Recherche de l'utilisateur par email ou username (visiteur/personnel)
+        $stmt = $this->db->prepare("SELECT * FROM users WHERE (email = ? OR username = ?) AND role IN ('visiteur', 'visiteur_auth', 'personnel')");
+        $stmt->execute([$identifier, $identifier]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
         
         if (!$user || !password_verify($password, $user['password'])) {
-            header('Location: ../views/Auth/login.php?error=Identifiants incorrects');
+            header('Location: /Site-Maison-de-la-communication/app/views/Auth/login.php?error=Identifiants incorrects');
             return;
         }
         
@@ -56,7 +56,7 @@ class AuthController {
         $_SESSION['user_role'] = $user['role'];
         $_SESSION['user_email'] = $user['email'];
         
-        header('Location: ../../../index.php?success=Connexion réussie');
+        header('Location: /Site-Maison-de-la-communication/index.php?success=Connexion réussie');
     }
     
     private function register() {
@@ -66,12 +66,12 @@ class AuthController {
         $confirm_password = $_POST['confirm_password'] ?? '';
         
         if (empty($username) || empty($email) || empty($password)) {
-            header('Location: ../views/Auth/register.php?error=Tous les champs sont requis');
+            header('Location: /Site-Maison-de-la-communication/app/views/Auth/register.php?error=Tous les champs sont requis');
             return;
         }
         
         if ($password !== $confirm_password) {
-            header('Location: ../views/Auth/register.php?error=Les mots de passe ne correspondent pas');
+            header('Location: /Site-Maison-de-la-communication/app/views/Auth/register.php?error=Les mots de passe ne correspondent pas');
             return;
         }
         
@@ -79,7 +79,7 @@ class AuthController {
         $stmt = $this->db->prepare("SELECT id FROM users WHERE username = ? OR email = ?");
         $stmt->execute([$username, $email]);
         if ($stmt->fetch()) {
-            header('Location: ../views/Auth/register.php?error=Utilisateur déjà existant');
+            header('Location: /Site-Maison-de-la-communication/app/views/Auth/register.php?error=Utilisateur déjà existant');
             return;
         }
         
@@ -91,9 +91,9 @@ class AuthController {
             ");
             $stmt->execute([$username, $email, $hashedPassword]);
             
-            header('Location: ../views/Auth/login.php?success=Compte créé avec succès');
+            header('Location: /Site-Maison-de-la-communication/app/views/Auth/login.php?success=Compte créé avec succès');
         } catch (Exception $e) {
-            header('Location: ../views/Auth/register.php?error=Erreur lors de la création du compte');
+            header('Location: /Site-Maison-de-la-communication/app/views/Auth/register.php?error=Erreur lors de la création du compte');
         }
     }
     
@@ -104,12 +104,12 @@ class AuthController {
         unset($_SESSION['user_role']);
         unset($_SESSION['user_email']);
         
-        header('Location: ../../../index.php?success=Déconnexion réussie');
+        header('Location: /Site-Maison-de-la-communication/index.php?success=Déconnexion réussie');
     }
     
     private function showLogin() {
         // Rediriger vers la page de connexion si pas d'action spécifique
-        header('Location: ../views/Auth/login.php');
+        header('Location: /Site-Maison-de-la-communication/app/views/Auth/login.php');
     }
 }
 

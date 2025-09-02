@@ -9,7 +9,7 @@
 </head>
 <body>
   <div class="auth">
-    <form class="auth-card" action="index.php?controller=auth&action=login" method="post">
+    <form class="auth-card" action="../../controlleurs/AuthController.php?action=login" method="post">
       <h1>Connexion</h1>
 
       <label for="email">E-mail</label>
@@ -27,8 +27,8 @@
         <button class="btn" type="submit">Se connecter</button>
       </div>
 
-      <?php if (!empty($error)) : ?>
-        <p class="error"><?= htmlspecialchars($error) ?></p>
+      <?php if (!empty($_GET['error'])) : ?>
+        <p class="error"><?= htmlspecialchars($_GET['error']) ?></p>
       <?php endif; ?>
     </form>
   </div>
