@@ -4,6 +4,54 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
     header('Location: login.php');
     exit();
 }
+
+// Load dashboard statistics from session or database
+$totalPublications = 0;
+$totalUsers = 0;
+$totalMedia = 0;
+$totalModules = 0;
+$publicationsByModule = [];
+$recentPublications = [];
+$usersByRole = [];
+
+if (isset($_SESSION['dashboard_stats']) && is_array($_SESSION['dashboard_stats'])) {
+    $stats = $_SESSION['dashboard_stats'];
+    $totalPublications = (int)($stats['totalPublications'] ?? 0);
+    $totalUsers = (int)($stats['totalUsers'] ?? 0);
+    $totalMedia = (int)($stats['totalMedia'] ?? 0);
+    $totalModules = (int)($stats['totalModules'] ?? 0);
+} else {
+    // Fallback: direct database queries if session not available
+    require_once $_SERVER['DOCUMENT_ROOT'] . '/Site-Maison-de-la-communication/config/Database.php';
+    $pdo = Config\Database::getConnection();
+    try {
+        $totalPublications = (int)$pdo->query("SELECT COUNT(*) FROM publications")->fetchColumn();
+        $totalUsers = (int)$pdo->query("SELECT COUNT(*) FROM users")->fetchColumn();
+        $totalMedia = (int)$pdo->query("SELECT COUNT(*) FROM media")->fetchColumn();
+        $totalModules = (int)$pdo->query("SELECT COUNT(*) FROM modules")->fetchColumn();
+        
+        // Publications by module
+        $stmt = $pdo->query("
+            SELECT m.name as module_name, COUNT(p.id) as publication_count 
+            FROM modules m 
+            LEFT JOIN publications p ON m.id = p.module_id 
+            GROUP BY m.id, m.name
+        ");
+        $publicationsByModule = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Users by role
+        $stmt = $pdo->query("
+            SELECT role, COUNT(*) as count 
+            FROM users 
+            GROUP BY role
+        ");
+        $usersByRole = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $e) {
+        // Keep default values if database error occurs
+    }
+}
+
+// Statistics are already loaded above
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -11,7 +59,7 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Administration MCC - Tableau de bord</title>
-    <link rel="stylesheet" href="../../../public/assets/css/admin.css">
+    <link rel="stylesheet" href="/Site-Maison-de-la-communication/public/assets/css/admin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body class="admin-dashboard">
@@ -19,7 +67,7 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
         <!-- Sidebar -->
         <aside class="admin-sidebar">
             <div class="sidebar-header">
-                <img src="../../../Images/logo.png" alt="MCC Logo" class="sidebar-logo">
+                <img src="/Site-Maison-de-la-communication/Images/Logo Diocese.png" alt="MCC Logo" class="sidebar-logo">
                 <h3>Administration</h3>
             </div>
             
@@ -70,7 +118,7 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
             </nav>
             
             <div class="sidebar-footer">
-                <a href="../../../app/controlleurs/AdminController.php?action=logout" class="btn-logout">
+                                 <a href="/Site-Maison-de-la-communication/app/controlleurs/AdminController.php?action=logout" class="btn-logout">
                     <i class="fas fa-sign-out-alt"></i>
                     <span>Déconnexion</span>
                 </a>
@@ -85,7 +133,11 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
                     <p>Bienvenue dans l'interface d'administration</p>
                 </div>
                 <div class="header-actions">
-                    <a href="../../../index.php" class="btn btn-outline" target="_blank">
+                    <button onclick="refreshStats()" class="btn btn-outline">
+                        <i class="fas fa-sync-alt"></i>
+                        Actualiser
+                    </button>
+                    <a href="/Site-Maison-de-la-communication/index.php" class="btn btn-outline" target="_blank">
                         <i class="fas fa-external-link-alt"></i>
                         Voir le site
                     </a>
@@ -102,7 +154,7 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
                                 <i class="fas fa-newspaper"></i>
                             </div>
                             <div class="stat-content">
-                                <h3><?php echo $totalPublications ?? 0; ?></h3>
+                                <h3 id="totalPublications"><?php echo $totalPublications; ?></h3>
                                 <p>Publications</p>
                             </div>
                         </div>
@@ -112,7 +164,7 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
                                 <i class="fas fa-users"></i>
                             </div>
                             <div class="stat-content">
-                                <h3><?php echo $totalUsers ?? 0; ?></h3>
+                                <h3 id="totalUsers"><?php echo $totalUsers; ?></h3>
                                 <p>Utilisateurs</p>
                             </div>
                         </div>
@@ -122,7 +174,7 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
                                 <i class="fas fa-images"></i>
                             </div>
                             <div class="stat-content">
-                                <h3><?php echo $totalMedia ?? 0; ?></h3>
+                                <h3 id="totalMedia"><?php echo $totalMedia; ?></h3>
                                 <p>Médias</p>
                             </div>
                         </div>
@@ -132,8 +184,48 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
                                 <i class="fas fa-cubes"></i>
                             </div>
                             <div class="stat-content">
-                                <h3><?php echo $totalModules ?? 4; ?></h3>
+                                <h3 id="totalModules"><?php echo $totalModules; ?></h3>
                                 <p>Modules</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Statistiques détaillées -->
+                <section class="detailed-stats">
+                    <h2>Statistiques détaillées</h2>
+                    <div class="stats-details-grid">
+                        <!-- Publications par module -->
+                        <div class="stats-card">
+                            <h3>Publications par module</h3>
+                            <div class="stats-list">
+                                <?php if (!empty($publicationsByModule)): ?>
+                                    <?php foreach ($publicationsByModule as $moduleStat): ?>
+                                        <div class="stat-item">
+                                            <span class="stat-label"><?php echo htmlspecialchars($moduleStat['module_name']); ?></span>
+                                            <span class="stat-value"><?php echo $moduleStat['publication_count']; ?></span>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <p class="no-data">Aucune publication trouvée</p>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+
+                        <!-- Utilisateurs par rôle -->
+                        <div class="stats-card">
+                            <h3>Utilisateurs par rôle</h3>
+                            <div class="stats-list">
+                                <?php if (!empty($usersByRole)): ?>
+                                    <?php foreach ($usersByRole as $roleStat): ?>
+                                        <div class="stat-item">
+                                            <span class="stat-label"><?php echo htmlspecialchars($roleStat['role']); ?></span>
+                                            <span class="stat-value"><?php echo $roleStat['count']; ?></span>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <p class="no-data">Aucun utilisateur trouvé</p>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -227,5 +319,60 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
             </div>
         </main>
     </div>
+
+    <script>
+        function refreshStats() {
+            // Show loading state
+            const refreshBtn = event.target;
+            const originalText = refreshBtn.innerHTML;
+            refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Actualisation...';
+            refreshBtn.disabled = true;
+
+            // Fetch updated stats
+            fetch('/Site-Maison-de-la-communication/app/controlleurs/DashboardController.php?action=getStats')
+                .then(response => response.json())
+                .then(data => {
+                    // Update statistics
+                    document.getElementById('totalPublications').textContent = data.totalPublications || 0;
+                    document.getElementById('totalUsers').textContent = data.totalUsers || 0;
+                    document.getElementById('totalMedia').textContent = data.totalMedia || 0;
+                    document.getElementById('totalModules').textContent = data.totalModules || 0;
+                    
+                    // Show success message
+                    showNotification('Statistiques actualisées avec succès', 'success');
+                })
+                .catch(error => {
+                    console.error('Erreur lors de l\'actualisation:', error);
+                    showNotification('Erreur lors de l\'actualisation des statistiques', 'error');
+                })
+                .finally(() => {
+                    // Restore button state
+                    refreshBtn.innerHTML = originalText;
+                    refreshBtn.disabled = false;
+                });
+        }
+
+        function showNotification(message, type) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.innerHTML = `
+                <div class="notification-content">
+                    <span>${message}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" class="notification-close">&times;</button>
+                </div>
+            `;
+            
+            // Add to page
+            document.body.appendChild(notification);
+            
+            // Auto-remove after 3 seconds
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 3000);
+        }
+    </script>
 </body>
 </html>

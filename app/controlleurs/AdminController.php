@@ -455,7 +455,7 @@ class AdminController {
             return;
         }
         
-        $nom = $_POST['nom'] ?? '';
+         $nom = $_POST['nom'] ?? '';
         $description = $_POST['description'] ?? '';
         $statut = $_POST['statut'] ?? 'actif';
         $icone = $_POST['icone'] ?? '';
