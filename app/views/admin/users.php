@@ -158,10 +158,16 @@ $users = $usersQuery->fetchAll(PDO::FETCH_ASSOC);
                                         </td>
                                         <td>
                                             <div class="action-buttons">
-                                                <button onclick="editUser(<?php echo $user['id']; ?>)" 
-                                                        class="btn btn-sm btn-outline" title="Modifier le rôle">
-                                                    <i class="fas fa-user-shield"></i>
-                                                </button>
+                                                <?php if ($user['id'] == $_SESSION['admin_user_id']): ?>
+                                                    <button type="button" class="btn btn-sm btn-outline" title="Vous ne pouvez pas modifier votre propre rôle" disabled>
+                                                        <i class="fas fa-user-shield"></i>
+                                                    </button>
+                                                <?php else: ?>
+                                                    <button onclick="editUser(<?php echo $user['id']; ?>)" 
+                                                            class="btn btn-sm btn-outline" title="Modifier le rôle">
+                                                        <i class="fas fa-user-shield"></i>
+                                                    </button>
+                                                <?php endif; ?>
                                             </div>
                                         </td>
                                     </tr>
