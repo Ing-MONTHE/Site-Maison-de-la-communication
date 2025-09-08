@@ -35,14 +35,8 @@ class AdminController {
             case 'deleteMedia':
                 $this->deleteMedia();
                 break;
-            case 'createUser':
-                $this->createUser();
-                break;
-            case 'updateUser':
-                $this->updateUser();
-                break;
-            case 'deleteUser':
-                $this->deleteUser();
+            case 'updateUserRole':
+                $this->updateUserRole();
                 break;
             case 'createModule':
                 $this->createModule();
@@ -303,111 +297,28 @@ class AdminController {
         }
     }
     
-    private function createUser() {
-        if (!$this->isAuthenticated() || $_SESSION['admin_role'] !== 'admin') {
+    private function updateUserRole() {
+        if (!$this->isAuthenticated()) {
             header('Location: ../views/admin/login.php');
             return;
         }
-        
-        $username = $_POST['username'] ?? '';
-        $email = $_POST['email'] ?? '';
-        $password = $_POST['password'] ?? '';
-        $role = $_POST['role'] ?? 'visiteur';
-        
-        if (empty($username) || empty($password)) {
-            header('Location: ../views/admin/users.php?error=Données manquantes');
-            return;
-        }
-        
-        // Vérifier si l'utilisateur existe déjà
-        $stmt = $this->db->prepare("SELECT id FROM users WHERE username = ? OR email = ?");
-        $stmt->execute([$username, $email]);
-        if ($stmt->fetch()) {
-            header('Location: ../views/admin/users.php?error=Utilisateur déjà existant');
-            return;
-        }
-        
-        try {
-            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-            $stmt = $this->db->prepare("
-                INSERT INTO users (username, email, password, role) 
-                VALUES (?, ?, ?, ?)
-            ");
-            $stmt->execute([$username, $email, $hashedPassword, $role]);
-            
-            header('Location: ../views/admin/users.php?success=Utilisateur créé avec succès');
-        } catch (Exception $e) {
-            header('Location: ../views/admin/users.php?error=Erreur lors de la création');
-        }
-    }
-    
-    private function updateUser() {
-        if (!$this->isAuthenticated() || $_SESSION['admin_role'] !== 'admin') {
-            header('Location: ../views/admin/login.php');
-            return;
-        }
-        
         $id = $_POST['id'] ?? '';
-        $username = $_POST['username'] ?? '';
-        $email = $_POST['email'] ?? '';
         $role = $_POST['role'] ?? 'visiteur';
-        $password = $_POST['password'] ?? '';
-        
-        if (empty($id) || empty($username)) {
-            header('Location: ../views/admin/users.php?error=Données manquantes');
-            return;
-        }
-        
-        try {
-            if (!empty($password)) {
-                $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-                $stmt = $this->db->prepare("
-                    UPDATE users 
-                    SET username = ?, email = ?, password = ?, role = ? 
-                    WHERE id = ?
-                ");
-                $stmt->execute([$username, $email, $hashedPassword, $role, $id]);
-            } else {
-                $stmt = $this->db->prepare("
-                    UPDATE users 
-                    SET username = ?, email = ?, role = ? 
-                    WHERE id = ?
-                ");
-                $stmt->execute([$username, $email, $role, $id]);
-            }
-            
-            header('Location: ../views/admin/users.php?success=Utilisateur mis à jour avec succès');
-        } catch (Exception $e) {
-            header('Location: ../views/admin/users.php?error=Erreur lors de la mise à jour');
-        }
-    }
-    
-    private function deleteUser() {
-        if (!$this->isAuthenticated() || $_SESSION['admin_role'] !== 'admin') {
-            header('Location: ../views/admin/login.php');
-            return;
-        }
-        
-        $id = $_GET['id'] ?? '';
-        
         if (empty($id)) {
             header('Location: ../views/admin/users.php?error=ID manquant');
             return;
         }
-        
-        // Empêcher la suppression de son propre compte
-        if ($id == $_SESSION['admin_user_id']) {
-            header('Location: ../views/admin/users.php?error=Impossible de supprimer votre propre compte');
+        if ($id == $_SESSION['admin_user_id'] && $role !== $_SESSION['admin_role']) {
+            // Empêcher qu'un admin change son propre rôle et perde l'accès
+            header('Location: ../views/admin/users.php?error=Impossible de changer votre propre rôle');
             return;
         }
-        
         try {
-            $stmt = $this->db->prepare("DELETE FROM users WHERE id = ?");
-            $stmt->execute([$id]);
-            
-            header('Location: ../views/admin/users.php?success=Utilisateur supprimé avec succès');
+            $stmt = $this->db->prepare("UPDATE users SET role = ? WHERE id = ?");
+            $stmt->execute([$role, $id]);
+            header('Location: ../views/admin/users.php?success=Rôle mis à jour');
         } catch (Exception $e) {
-            header('Location: ../views/admin/users.php?error=Erreur lors de la suppression');
+            header('Location: ../views/admin/users.php?error=Erreur lors de la mise à jour du rôle');
         }
     }
     

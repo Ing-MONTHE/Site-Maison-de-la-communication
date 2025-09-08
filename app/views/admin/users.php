@@ -93,12 +93,7 @@ $users = $usersQuery->fetchAll(PDO::FETCH_ASSOC);
                     <h1>Gestion des Utilisateurs</h1>
                     <p>Gérer les comptes utilisateurs et les permissions</p>
                 </div>
-                <div class="header-actions">
-                    <button onclick="openCreateUserModal()" class="btn btn-primary">
-                        <i class="fas fa-user-plus"></i>
-                        Nouvel utilisateur
-                    </button>
-                </div>
+                <div class="header-actions"></div>
             </header>
             
             <div class="admin-content">
@@ -138,7 +133,7 @@ $users = $usersQuery->fetchAll(PDO::FETCH_ASSOC);
                             </thead>
                             <tbody>
                                 <?php foreach ($users as $user): ?>
-                                    <tr data-role="<?php echo $user['role']; ?>">
+                                    <tr data-id="<?php echo $user['id']; ?>" data-role="<?php echo $user['role']; ?>" data-username="<?php echo htmlspecialchars($user['username']); ?>" data-email="<?php echo htmlspecialchars($user['email'] ?? ''); ?>">
                                         <td>
                                             <div class="user-info">
                                                 <div class="user-avatar">
@@ -164,15 +159,9 @@ $users = $usersQuery->fetchAll(PDO::FETCH_ASSOC);
                                         <td>
                                             <div class="action-buttons">
                                                 <button onclick="editUser(<?php echo $user['id']; ?>)" 
-                                                        class="btn btn-sm btn-outline" title="Modifier">
-                                                    <i class="fas fa-edit"></i>
+                                                        class="btn btn-sm btn-outline" title="Modifier le rôle">
+                                                    <i class="fas fa-user-shield"></i>
                                                 </button>
-                                                <?php if ($user['id'] != $_SESSION['admin_user_id']): ?>
-                                                    <button onclick="deleteUser(<?php echo $user['id']; ?>)" 
-                                                            class="btn btn-sm btn-danger" title="Supprimer">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                <?php endif; ?>
                                             </div>
                                         </td>
                                     </tr>
@@ -185,57 +174,7 @@ $users = $usersQuery->fetchAll(PDO::FETCH_ASSOC);
         </main>
     </div>
     
-    <!-- Modal de création d'utilisateur -->
-    <div id="createUserModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Nouvel utilisateur</h3>
-                <button onclick="closeCreateUserModal()" class="btn-close">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form method="POST" action="../../../app/controlleurs/AdminController.php" class="user-form">
-                    <input type="hidden" name="action" value="createUser">
-                    
-                    <div class="form-group">
-                        <label for="username">Nom d'utilisateur *</label>
-                        <input type="text" id="username" name="username" required class="form-input">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="email">Email</label>
-                        <input type="email" id="email" name="email" class="form-input">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="password">Mot de passe *</label>
-                        <input type="password" id="password" name="password" required class="form-input">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="role">Rôle</label>
-                        <select id="role" name="role" class="form-select">
-                            <option value="visiteur">Visiteur</option>
-                            <option value="visiteur_auth">Visiteur authentifié</option>
-                            <option value="personnel">Personnel</option>
-                            <option value="admin">Administrateur</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i>
-                            Créer l'utilisateur
-                        </button>
-                        <button type="button" onclick="closeCreateUserModal()" class="btn btn-outline">
-                            Annuler
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+    
     
     <!-- Modal de modification d'utilisateur -->
     <div id="editUserModal" class="modal">
@@ -248,22 +187,17 @@ $users = $usersQuery->fetchAll(PDO::FETCH_ASSOC);
             </div>
             <div class="modal-body">
                 <form method="POST" action="../../../app/controlleurs/AdminController.php" class="user-form">
-                    <input type="hidden" name="action" value="updateUser">
+                    <input type="hidden" name="action" value="updateUserRole">
                     <input type="hidden" id="edit-user-id" name="id">
                     
                     <div class="form-group">
-                        <label for="edit-username">Nom d'utilisateur *</label>
-                        <input type="text" id="edit-username" name="username" required class="form-input">
+                        <label>Utilisateur</label>
+                        <input type="text" id="edit-username" class="form-input" disabled>
                     </div>
                     
                     <div class="form-group">
-                        <label for="edit-email">Email</label>
-                        <input type="email" id="edit-email" name="email" class="form-input">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="edit-password">Nouveau mot de passe (laisser vide pour ne pas changer)</label>
-                        <input type="password" id="edit-password" name="password" class="form-input">
+                        <label>Email</label>
+                        <input type="text" id="edit-email" class="form-input" disabled>
                     </div>
                     
                     <div class="form-group">
@@ -279,7 +213,7 @@ $users = $usersQuery->fetchAll(PDO::FETCH_ASSOC);
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-save"></i>
-                            Mettre à jour
+                            Mettre à jour le rôle
                         </button>
                         <button type="button" onclick="closeEditUserModal()" class="btn btn-outline">
                             Annuler
@@ -290,36 +224,14 @@ $users = $usersQuery->fetchAll(PDO::FETCH_ASSOC);
         </div>
     </div>
     
-    <!-- Modal de confirmation de suppression -->
-    <div id="deleteModal" class="modal">
-        <div class="modal-content">
-            <h3>Confirmer la suppression</h3>
-            <p>Êtes-vous sûr de vouloir supprimer cet utilisateur ?</p>
-            <div class="modal-actions">
-                <button onclick="closeDeleteModal()" class="btn btn-outline">Annuler</button>
-                <button onclick="confirmDelete()" class="btn btn-danger">Supprimer</button>
-            </div>
-        </div>
-    </div>
-    
     <script>
-        let userToDelete = null;
-        
-        function openCreateUserModal() {
-            document.getElementById('createUserModal').style.display = 'flex';
-        }
-        
-        function closeCreateUserModal() {
-            document.getElementById('createUserModal').style.display = 'none';
-        }
-        
         function editUser(id) {
-            // Récupérer les données de l'utilisateur via AJAX ou les passer en paramètre
-            // Pour simplifier, on utilise des données statiques
+            const row = document.querySelector(`tr[data-id='${id}']`);
+            if (!row) return;
             document.getElementById('edit-user-id').value = id;
-            document.getElementById('edit-username').value = 'Utilisateur ' + id;
-            document.getElementById('edit-email').value = 'user' + id + '@example.com';
-            document.getElementById('edit-role').value = 'visiteur';
+            document.getElementById('edit-username').value = row.dataset.username || '';
+            document.getElementById('edit-email').value = row.dataset.email || '';
+            document.getElementById('edit-role').value = row.dataset.role || 'visiteur';
             document.getElementById('editUserModal').style.display = 'flex';
         }
         
@@ -327,34 +239,12 @@ $users = $usersQuery->fetchAll(PDO::FETCH_ASSOC);
             document.getElementById('editUserModal').style.display = 'none';
         }
         
-        function deleteUser(id) {
-            userToDelete = id;
-            document.getElementById('deleteModal').style.display = 'flex';
-        }
-        
-        function closeDeleteModal() {
-            document.getElementById('deleteModal').style.display = 'none';
-            userToDelete = null;
-        }
-        
-        function confirmDelete() {
-            if (userToDelete) {
-                window.location.href = `../../../app/controlleurs/AdminController.php?action=deleteUser&id=${userToDelete}`;
-            }
-        }
-        
         // Fermer les modals en cliquant à l'extérieur
         window.onclick = function(event) {
-            const createModal = document.getElementById('createUserModal');
             const editModal = document.getElementById('editUserModal');
-            const deleteModal = document.getElementById('deleteModal');
             
-            if (event.target === createModal) {
-                closeCreateUserModal();
-            } else if (event.target === editModal) {
+            if (event.target === editModal) {
                 closeEditUserModal();
-            } else if (event.target === deleteModal) {
-                closeDeleteModal();
             }
         }
         
