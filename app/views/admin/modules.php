@@ -28,6 +28,7 @@ $modules = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <!-- Sidebar -->
         <aside class="admin-sidebar">
             <div class="sidebar-header">
+                <img src="../../../Images/logo.png" alt="MCC Logo" class="sidebar-logo">
                 <h2><i class="fas fa-cogs"></i> Administration</h2>
             </div>
             <nav class="sidebar-nav">
@@ -115,7 +116,7 @@ $modules = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <section class="modules-section">
                     <div class="modules-grid">
                         <?php foreach ($modules as $module): ?>
-                        <div class="module-card" data-name="<?= htmlspecialchars($module['nom'] ?? $module['name']) ?>" data-status="<?= $module['statut'] ?? 'actif' ?>">
+                        <div class="module-card" data-name="<?= htmlspecialchars($module['name']) ?>" data-status="<?= $module['statut'] ?? 'actif' ?>">
                             <div class="module-header">
                                 <div class="module-icon">
                                     <i class="fas fa-cog"></i>
@@ -125,30 +126,28 @@ $modules = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 </div>
                             </div>
                             <div class="module-content">
-                                <h3><?= htmlspecialchars($module['nom'] ?? $module['name']) ?></h3>
+                                <h3><?= htmlspecialchars($module['name']) ?></h3>
                                 <p class="module-description">
                                     <?= htmlspecialchars($module['description'] ?? 'Aucune description disponible') ?>
                                 </p>
                                 <div class="module-meta">
                                     <span class="meta-item">
                                         <i class="fas fa-calendar"></i>
-                                        Créé le <?= date('d/m/Y', strtotime(($module['date_creation'] ?? null) ?: ($module['created_at'] ?? 'now'))) ?>
+                                        Créé le <?= date('d/m/Y', strtotime(($module['created_at'] ?? 'now'))) ?>
                                     </span>
-                                    <?php if (!empty($module['date_modification'])): ?>
-                                    <span class="meta-item">
-                                        <i class="fas fa-edit"></i>
-                                        Modifié le <?= date('d/m/Y', strtotime($module['date_modification'])) ?>
-                                    </span>
-                                    <?php endif; ?>
                                 </div>
                             </div>
                             <div class="module-actions">
                                 <button class="btn btn-sm btn-secondary" onclick="editModule(<?= $module['id'] ?>)">
                                     <i class="fas fa-edit"></i> Modifier
                                 </button>
-                                <button class="btn btn-sm btn-danger" onclick="deleteModule(<?= $module['id'] ?>, '<?= htmlspecialchars($module['nom'] ?? $module['name']) ?>')">
-                                    <i class="fas fa-trash"></i> Supprimer
-                                </button>
+                                <form action="../../../app/controlleurs/AdminController.php" method="POST" style="display:inline-block;">
+                                    <input type="hidden" name="action" value="deleteModule">
+                                    <input type="hidden" name="module_id" value="<?= $module['id'] ?>">
+                                    <button type="submit" class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash"></i> Supprimer
+                                    </button>
+                                </form>
                             </div>
                         </div>
                         <?php endforeach; ?>
@@ -199,17 +198,6 @@ $modules = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </select>
                 </div>
 
-                <div class="form-group">
-                    <label for="moduleIcon">Icône (optionnel)</label>
-                    <input type="text" id="moduleIcon" name="icone" class="form-input" placeholder="Ex: fas fa-print, fas fa-video">
-                    <small>Utilisez les classes Font Awesome (ex: fas fa-print)</small>
-                </div>
-
-                <div class="form-group">
-                    <label for="moduleColor">Couleur du module (optionnel)</label>
-                    <input type="color" id="moduleColor" name="couleur" class="form-input" value="#007bff" style="padding:6px;height:42px;">
-                </div>
-
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeModuleModal()">Annuler</button>
                     <button type="submit" class="btn btn-primary">
@@ -220,30 +208,6 @@ $modules = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
     </div>
 
-    <!-- Modal de confirmation de suppression -->
-    <div id="deleteModuleModal" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Confirmer la suppression</h2>
-                <button type="button" class="btn-close" aria-label="Fermer" onclick="closeDeleteModuleModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p>Êtes-vous sûr de vouloir supprimer le module "<span id="moduleNameToDelete"></span>" ?</p>
-                <p class="warning">Cette action est irréversible et supprimera également toutes les publications associées à ce module.</p>
-            </div>
-            <div class="modal-actions">
-                <button class="btn btn-secondary" onclick="closeDeleteModuleModal()">Annuler</button>
-                <form action="../../../app/controlleurs/AdminController.php" method="POST" style="display: inline;">
-                    <input type="hidden" name="action" value="deleteModule">
-                    <input type="hidden" name="module_id" id="moduleIdToDelete" value="">
-                    <button type="submit" class="btn btn-danger">
-                        <i class="fas fa-trash"></i> Supprimer définitivement
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-
     <script>
         // Fonctions pour la gestion des modules
         function openAddModuleModal() {
@@ -251,28 +215,32 @@ $modules = $stmt->fetchAll(PDO::FETCH_ASSOC);
             document.getElementById('moduleAction').value = 'createModule';
             document.getElementById('moduleId').value = '';
             document.getElementById('moduleForm').reset();
+            document.getElementById('moduleStatus').value = 'actif';
             document.getElementById('moduleModal').style.display = 'flex';
         }
 
         function editModule(moduleId) {
-            document.getElementById('modalTitle').textContent = 'Modifier le Module';
-            document.getElementById('moduleAction').value = 'updateModule';
-            document.getElementById('moduleId').value = moduleId;
-            document.getElementById('moduleModal').style.display = 'flex';
+            // Charger les données via l'action getModule (JSON)
+            fetch(`../../../app/controlleurs/AdminController.php?action=getModule&id=${moduleId}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data && !data.error) {
+                        document.getElementById('modalTitle').textContent = 'Modifier le Module';
+                        document.getElementById('moduleAction').value = 'updateModule';
+                        document.getElementById('moduleId').value = data.id;
+                        document.getElementById('moduleName').value = data.name || '';
+                        document.getElementById('moduleDescription').value = data.description || '';
+                        document.getElementById('moduleStatus').value = (data.statut || 'actif');
+                        document.getElementById('moduleModal').style.display = 'flex';
+                    } else {
+                        alert('Impossible de charger le module.');
+                    }
+                })
+                .catch(() => alert('Erreur de chargement du module.'));
         }
 
         function closeModuleModal() {
             document.getElementById('moduleModal').style.display = 'none';
-        }
-
-        function deleteModule(moduleId, moduleName) {
-            document.getElementById('moduleNameToDelete').textContent = moduleName;
-            document.getElementById('moduleIdToDelete').value = moduleId;
-            document.getElementById('deleteModuleModal').style.display = 'flex';
-        }
-
-        function closeDeleteModuleModal() {
-            document.getElementById('deleteModuleModal').style.display = 'none';
         }
 
         function filterModules() {
@@ -297,16 +265,13 @@ $modules = $stmt->fetchAll(PDO::FETCH_ASSOC);
         // Fermer les modals en cliquant à l'extérieur
         window.onclick = function(event) {
             const moduleModal = document.getElementById('moduleModal');
-            const deleteModal = document.getElementById('deleteModuleModal');
             if (event.target === moduleModal) { closeModuleModal(); }
-            if (event.target === deleteModal) { closeDeleteModuleModal(); }
         }
 
         // Échap pour fermer rapidement
         window.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 closeModuleModal();
-                closeDeleteModuleModal();
             }
         });
     </script>

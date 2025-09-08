@@ -47,9 +47,21 @@ class AdminController {
             case 'deleteModule':
                 $this->deleteModule();
                 break;
+            case 'getModule':
+                $this->getModule();
+                break;
             default:
                 $this->showDashboard();
                 break;
+        }
+    }
+
+    private function hasModuleStatus(): bool {
+        try {
+            $stmt = $this->db->query("SHOW COLUMNS FROM modules LIKE 'statut'");
+            return (bool)$stmt->fetch();
+        } catch (\Throwable $e) {
+            return false;
         }
     }
     
@@ -366,11 +378,9 @@ class AdminController {
             return;
         }
         
-         $nom = $_POST['nom'] ?? '';
+        $nom = $_POST['nom'] ?? '';
         $description = $_POST['description'] ?? '';
         $statut = $_POST['statut'] ?? 'actif';
-        $icone = $_POST['icone'] ?? '';
-        $couleur = $_POST['couleur'] ?? '#007bff';
         
         if (empty($nom)) {
             header('Location: ../views/admin/modules.php?error=Nom du module requis');
@@ -378,11 +388,13 @@ class AdminController {
         }
         
         try {
-            $stmt = $this->db->prepare("
-                INSERT INTO modules (nom, description, statut, icone, couleur, date_creation) 
-                VALUES (?, ?, ?, ?, ?, NOW())
-            ");
-            $stmt->execute([$nom, $description, $statut, $icone, $couleur]);
+            if ($this->hasModuleStatus()) {
+                $stmt = $this->db->prepare("INSERT INTO modules (name, description, statut, created_at) VALUES (?, ?, ?, NOW())");
+                $stmt->execute([$nom, $description, $statut]);
+            } else {
+                $stmt = $this->db->prepare("INSERT INTO modules (name, description, created_at) VALUES (?, ?, NOW())");
+                $stmt->execute([$nom, $description]);
+            }
             
             header('Location: ../views/admin/modules.php?success=Module créé avec succès');
         } catch (Exception $e) {
@@ -399,9 +411,7 @@ class AdminController {
         $id = $_POST['module_id'] ?? '';
         $nom = $_POST['nom'] ?? '';
         $description = $_POST['description'] ?? '';
-        $statut = $_POST['statut'] ?? 'actif';
-        $icone = $_POST['icone'] ?? '';
-        $couleur = $_POST['couleur'] ?? '#007bff';
+        $statut = $_POST['statut'] ?? null;
         
         if (empty($id) || empty($nom)) {
             header('Location: ../views/admin/modules.php?error=Données manquantes');
@@ -409,12 +419,13 @@ class AdminController {
         }
         
         try {
-            $stmt = $this->db->prepare("
-                UPDATE modules 
-                SET nom = ?, description = ?, statut = ?, icone = ?, couleur = ?, date_modification = NOW() 
-                WHERE id = ?
-            ");
-            $stmt->execute([$nom, $description, $statut, $icone, $couleur, $id]);
+            if ($this->hasModuleStatus() && $statut !== null) {
+                $stmt = $this->db->prepare("UPDATE modules SET name = ?, description = ?, statut = ? WHERE id = ?");
+                $stmt->execute([$nom, $description, $statut, $id]);
+            } else {
+                $stmt = $this->db->prepare("UPDATE modules SET name = ?, description = ? WHERE id = ?");
+                $stmt->execute([$nom, $description, $id]);
+            }
             
             header('Location: ../views/admin/modules.php?success=Module mis à jour avec succès');
         } catch (Exception $e) {
@@ -436,16 +447,9 @@ class AdminController {
         }
         
         try {
-            // Vérifier s'il y a des publications liées à ce module
-            $stmt = $this->db->prepare("SELECT COUNT(*) as total FROM publications WHERE module_id = ?");
+            // Supprimer d'abord les publications liées (si votre contrainte le permet)
+            $stmt = $this->db->prepare("DELETE FROM publications WHERE module_id = ?");
             $stmt->execute([$id]);
-            $publicationsCount = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
-            
-            if ($publicationsCount > 0) {
-                // Supprimer d'abord les publications liées
-                $stmt = $this->db->prepare("DELETE FROM publications WHERE module_id = ?");
-                $stmt->execute([$id]);
-            }
             
             // Supprimer le module
             $stmt = $this->db->prepare("DELETE FROM modules WHERE id = ?");
@@ -454,6 +458,37 @@ class AdminController {
             header('Location: ../views/admin/modules.php?success=Module supprimé avec succès');
         } catch (Exception $e) {
             header('Location: ../views/admin/modules.php?error=Erreur lors de la suppression');
+        }
+    }
+
+    private function getModule() {
+        if (!$this->isAuthenticated()) {
+            http_response_code(401);
+            header('Content-Type: application/json');
+            echo json_encode(['error' => 'Non autorisé']);
+            return;
+        }
+        $id = $_GET['id'] ?? '';
+        if (empty($id)) {
+            http_response_code(400);
+            header('Content-Type: application/json');
+            echo json_encode(['error' => 'ID manquant']);
+            return;
+        }
+        if ($this->hasModuleStatus()) {
+            $stmt = $this->db->prepare("SELECT id, name, description, statut FROM modules WHERE id = ?");
+        } else {
+            $stmt = $this->db->prepare("SELECT id, name, description FROM modules WHERE id = ?");
+        }
+        $stmt->execute([$id]);
+        $module = $stmt->fetch(PDO::FETCH_ASSOC);
+        header('Content-Type: application/json');
+        if ($module) {
+            if (!isset($module['statut'])) { $module['statut'] = 'actif'; }
+            echo json_encode($module);
+        } else {
+            http_response_code(404);
+            echo json_encode(['error' => 'Module introuvable']);
         }
     }
     
