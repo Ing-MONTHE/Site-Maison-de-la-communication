@@ -2,6 +2,18 @@
 session_start();
 require_once 'config/Auth.php';
 use Config\Auth;
+require_once 'config/Database.php';
+use Config\Database;
+
+// Récupération des modules depuis la base de données
+$modules = [];
+try {
+  $pdo = Database::getConnection();
+  $stmt = $pdo->query("SELECT id, name, description FROM modules ORDER BY created_at DESC");
+  $modules = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (Exception $e) {
+  $modules = [];
+}
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -109,58 +121,22 @@ use Config\Auth;
     <div class="container">
       <h2 class="section-title">Nos Services</h2>
       <div class="cards">
-        <article class="card">
-          <div class="card-illustration">
-            <img src="Images/logo RVE.jpg" alt="Logo Radio Vox Ecclesiae" />
-          </div>
-          <h3>Radio Vox Ecclesiae</h3>
-          <ul class="card-links">
-            <li><a href="#">Écouter en direct</a></li>
-            <li><a href="#">Podcasts et émissions</a></li>
-            <li><a href="#">Grille des programmes</a></li>
-          </ul>
-          <a class="btn btn-card" href="app/views/modules/rve.php">En savoir plus</a>
-        </article>
-
-        <article class="card">
-          <div class="card-illustration">
-            <img src="Images/Logo Imprimerie.png" alt="Logo Imprimerie" />
-          </div>
-          <h3>Imprimerie</h3>
-          <ul class="card-links">
-            <li><a href="#">Catalogues et brochures</a></li>
-            <li><a href="#">Cartes, flyers, affiches</a></li>
-            <li><a href="#">Devis et commandes</a></li>
-            <li><a href="#" id="open-payment">Parle Seigneur (payant)</a></li>
-          </ul>
-          <a class="btn btn-card" href="app/views/modules/imprimerie.php">En savoir plus</a>
-        </article>
-
-        <article class="card">
-          <div class="card-illustration">
-            <img src="Images/Logo SerCom.png" alt="Logo SerCom" />
-          </div>
-          <h3>SerCom</h3>
-          <ul class="card-links">
-            <li><a href="#">Community management</a></li>
-            <li><a href="#">Référencement (SEO)</a></li>
-            <li><a href="#">Emailing & campagnes</a></li>
-          </ul>
-          <a class="btn btn-card" href="app/views/modules/sercom.php">En savoir plus</a>
-        </article>
-
-        <article class="card">
-          <div class="card-illustration">
-            <img src="https://cdn-icons-png.flaticon.com/512/3209/3209984.png" alt="Luma Vitae" />
-          </div>
-          <h3>Luma Vitae</h3>
-          <ul class="card-links">
-            <li><a href="#">Identité visuelle</a></li>
-            <li><a href="#">Photo & vidéo</a></li>
-            <li><a href="#">Motion design</a></li>
-          </ul>
-          <a class="btn btn-card" href="#">En savoir plus</a>
-        </article>
+        <?php if (!empty($modules)): ?>
+          <?php foreach ($modules as $module): ?>
+            <article class="card">
+              <div class="card-illustration">
+                <img src="Images/Logo SerCom.png" alt="<?php echo htmlspecialchars($module['name']); ?>" onerror="this.style.display='none'" />
+              </div>
+              <h3><?php echo htmlspecialchars($module['name']); ?></h3>
+              <?php if (!empty($module['description'])): ?>
+              <p><?php echo htmlspecialchars($module['description']); ?></p>
+              <?php endif; ?>
+              <a class="btn btn-card" href="app/views/modules/index.php?id=<?php echo (int)$module['id']; ?>">En savoir plus</a>
+            </article>
+          <?php endforeach; ?>
+        <?php else: ?>
+          <p style="text-align:center">Aucun service disponible pour le moment.</p>
+        <?php endif; ?>
       </div>
     </div>
   </section>

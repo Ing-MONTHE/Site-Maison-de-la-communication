@@ -5,7 +5,7 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
     exit();
 }
 
-// Load dashboard statistics from session or database
+// Always load dashboard statistics directly from database
 $totalPublications = 0;
 $totalUsers = 0;
 $totalMedia = 0;
@@ -14,44 +14,33 @@ $publicationsByModule = [];
 $recentPublications = [];
 $usersByRole = [];
 
-if (isset($_SESSION['dashboard_stats']) && is_array($_SESSION['dashboard_stats'])) {
-    $stats = $_SESSION['dashboard_stats'];
-    $totalPublications = (int)($stats['totalPublications'] ?? 0);
-    $totalUsers = (int)($stats['totalUsers'] ?? 0);
-    $totalMedia = (int)($stats['totalMedia'] ?? 0);
-    $totalModules = (int)($stats['totalModules'] ?? 0);
-} else {
-    // Fallback: direct database queries if session not available
-    require_once $_SERVER['DOCUMENT_ROOT'] . '/Site-Maison-de-la-communication/config/Database.php';
-    $pdo = Config\Database::getConnection();
-    try {
-        $totalPublications = (int)$pdo->query("SELECT COUNT(*) FROM publications")->fetchColumn();
-        $totalUsers = (int)$pdo->query("SELECT COUNT(*) FROM users")->fetchColumn();
-        $totalMedia = (int)$pdo->query("SELECT COUNT(*) FROM media")->fetchColumn();
-        $totalModules = (int)$pdo->query("SELECT COUNT(*) FROM modules")->fetchColumn();
-        
-        // Publications by module
-        $stmt = $pdo->query("
+require_once $_SERVER['DOCUMENT_ROOT'] . '/Site-Maison-de-la-communication/config/Database.php';
+$pdo = Config\Database::getConnection();
+try {
+    $totalPublications = (int)$pdo->query("SELECT COUNT(*) FROM publications")->fetchColumn();
+    $totalUsers = (int)$pdo->query("SELECT COUNT(*) FROM users")->fetchColumn();
+    $totalMedia = (int)$pdo->query("SELECT COUNT(*) FROM media")->fetchColumn();
+    $totalModules = (int)$pdo->query("SELECT COUNT(*) FROM modules")->fetchColumn();
+    
+    // Publications by module
+    $stmt = $pdo->query("
             SELECT m.name as module_name, COUNT(p.id) as publication_count 
             FROM modules m 
             LEFT JOIN publications p ON m.id = p.module_id 
             GROUP BY m.id, m.name
         ");
-        $publicationsByModule = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
-        // Users by role
-        $stmt = $pdo->query("
+    $publicationsByModule = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Users by role
+    $stmt = $pdo->query("
             SELECT role, COUNT(*) as count 
             FROM users 
             GROUP BY role
         ");
-        $usersByRole = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    } catch (Exception $e) {
-        // Keep default values if database error occurs
-    }
+    $usersByRole = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (Exception $e) {
+    // Keep default values if database error occurs
 }
-
-// Statistics are already loaded above
 ?>
 <!DOCTYPE html>
 <html lang="fr">

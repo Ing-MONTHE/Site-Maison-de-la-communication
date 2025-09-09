@@ -118,9 +118,48 @@ class AdminController {
         try {
             $stmt = $this->db->prepare("
                 INSERT INTO publications (titre, contenu, module_id, auteur_id, statut) 
-                VALUES (?, ?, ?, ?, ?)
-            ");
+                VALUES (?, ?, ?, ?, ?)\n            ");
             $stmt->execute([$titre, $contenu, $module_id, $auteur_id, $statut]);
+            
+            $publicationId = (int)$this->db->lastInsertId();
+            
+            // Enregistrer aussi les médias envoyés avec la publication (si présents)
+            if (isset($_FILES['media_files']) && !empty($_FILES['media_files']['name'][0])) {
+                $uploadDir = '../../Images/uploads/';
+                if (!is_dir($uploadDir)) { mkdir($uploadDir, 0755, true); }
+                
+                foreach ($_FILES['media_files']['tmp_name'] as $key => $tmp_name) {
+                    $fileName = $_FILES['media_files']['name'][$key];
+                    $fileSize = $_FILES['media_files']['size'][$key];
+                    $fileError = $_FILES['media_files']['error'][$key];
+                    if ($fileError !== UPLOAD_ERR_OK) { continue; }
+                    
+                    $fileInfo = pathinfo($fileName);
+                    $extension = strtolower($fileInfo['extension'] ?? '');
+                    $allowedExtensions = ['jpg','jpeg','png','gif','mp4','mp3','wav','avi'];
+                    if (!in_array($extension, $allowedExtensions)) { continue; }
+                    if ($fileSize > 10 * 1024 * 1024) { continue; }
+                    
+                    $sanitizedName = preg_replace('/[^A-Za-z0-9_\.-]/','_', $fileName);
+                    $uniqueName = uniqid() . '_' . $sanitizedName;
+                    $filePath = $uploadDir . $uniqueName;
+                    
+                    $type = 'image';
+                    if (in_array($extension, ['mp4','avi'])) { $type = 'video'; }
+                    elseif (in_array($extension, ['mp3','wav'])) { $type = 'audio'; }
+                    
+                    if (move_uploaded_file($tmp_name, $filePath)) {
+                        try {
+                            $stmtMedia = $this->db->prepare("
+                                INSERT INTO media (publication_id, type, chemin, format, taille, uploaded_at) 
+                                VALUES (?, ?, ?, ?, ?, NOW())\n                            ");
+                            $stmtMedia->execute([$publicationId, $type, $filePath, $extension, $fileSize]);
+                        } catch (Exception $e) {
+                            if (file_exists($filePath)) { unlink($filePath); }
+                        }
+                    }
+                }
+            }
             
             header('Location: ../views/admin/publications.php?success=Publication créée avec succès');
         } catch (Exception $e) {
@@ -247,8 +286,8 @@ class AdminController {
             if (move_uploaded_file($tmp_name, $filePath)) {
                 try {
                     $stmt = $this->db->prepare("
-                        INSERT INTO media (publication_id, type, chemin, format, taille) 
-                        VALUES (?, ?, ?, ?, ?)
+                        INSERT INTO media (publication_id, type, chemin, format, taille, uploaded_at) 
+                        VALUES (?, ?, ?, ?, ?, NOW())
                     ");
                     $stmt->execute([$publication_id, $type, $filePath, $extension, $fileSize]);
                     $uploadedFiles[] = $fileName;

@@ -58,6 +58,7 @@ class User {
     }
 }
 
+
 <?php
 namespace app\Models;
 
