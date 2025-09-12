@@ -427,12 +427,15 @@ class AdminController {
         }
         
         try {
+            // Associer automatiquement le logo correspondant
+            $logoPath = $this->getModuleLogoPath($nom);
+            
             if ($this->hasModuleStatus()) {
-                $stmt = $this->db->prepare("INSERT INTO modules (name, description, statut, created_at) VALUES (?, ?, ?, NOW())");
-                $stmt->execute([$nom, $description, $statut]);
+                $stmt = $this->db->prepare("INSERT INTO modules (name, description, statut, logo_path, created_at) VALUES (?, ?, ?, ?, NOW())");
+                $stmt->execute([$nom, $description, $statut, $logoPath]);
             } else {
-                $stmt = $this->db->prepare("INSERT INTO modules (name, description, created_at) VALUES (?, ?, NOW())");
-                $stmt->execute([$nom, $description]);
+                $stmt = $this->db->prepare("INSERT INTO modules (name, description, logo_path, created_at) VALUES (?, ?, ?, NOW())");
+                $stmt->execute([$nom, $description, $logoPath]);
             }
             
             header('Location: ../views/admin/modules.php?success=Module créé avec succès');
@@ -515,9 +518,9 @@ class AdminController {
             return;
         }
         if ($this->hasModuleStatus()) {
-            $stmt = $this->db->prepare("SELECT id, name, description, statut FROM modules WHERE id = ?");
+            $stmt = $this->db->prepare("SELECT id, name, description, statut, logo_path FROM modules WHERE id = ?");
         } else {
-            $stmt = $this->db->prepare("SELECT id, name, description FROM modules WHERE id = ?");
+            $stmt = $this->db->prepare("SELECT id, name, description, logo_path FROM modules WHERE id = ?");
         }
         $stmt->execute([$id]);
         $module = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -529,6 +532,24 @@ class AdminController {
             http_response_code(404);
             echo json_encode(['error' => 'Module introuvable']);
         }
+    }
+    
+    private function getModuleLogoPath($moduleName) {
+        // Mapping des noms de modules vers les fichiers de logos
+        $logoMapping = [
+            'RVE' => 'Images/logo RVE.jpg',
+            'Imprimerie' => 'Images/Logo Imprimerie.png',
+            'SerCom' => 'Images/Logo SerCom.png',
+            'Luma Vitae' => 'Images/Logo Diocese.png', // Logo par défaut pour Luma Vitae
+        ];
+        
+        // Vérifier si le logo existe
+        if (isset($logoMapping[$moduleName]) && file_exists('../../' . $logoMapping[$moduleName])) {
+            return $logoMapping[$moduleName];
+        }
+        
+        // Logo par défaut si aucun logo spécifique n'est trouvé
+        return 'Images/Logo Diocese.png';
     }
     
     private function isAuthenticated() {

@@ -9,7 +9,7 @@ use Config\Database;
 $modules = [];
 try {
   $pdo = Database::getConnection();
-  $stmt = $pdo->query("SELECT id, name, description FROM modules ORDER BY created_at DESC");
+  $stmt = $pdo->query("SELECT id, name, description, logo_path FROM modules ORDER BY created_at DESC");
   $modules = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
   $modules = [];
@@ -125,7 +125,11 @@ try {
           <?php foreach ($modules as $module): ?>
             <article class="card">
               <div class="card-illustration">
-                <img src="Images/Logo SerCom.png" alt="<?php echo htmlspecialchars($module['name']); ?>" onerror="this.style.display='none'" />
+                <?php if (!empty($module['logo_path']) && file_exists($module['logo_path'])): ?>
+                  <img src="<?php echo htmlspecialchars($module['logo_path']); ?>" alt="<?php echo htmlspecialchars($module['name']); ?>" />
+                <?php else: ?>
+                  <img src="Images/Logo Diocese.png" alt="<?php echo htmlspecialchars($module['name']); ?>" />
+                <?php endif; ?>
               </div>
               <h3><?php echo htmlspecialchars($module['name']); ?></h3>
               <?php if (!empty($module['description'])): ?>

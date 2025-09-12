@@ -10,7 +10,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/Site-Maison-de-la-communication/confi
 $pdo = Config\Database::getConnection();
 
 // Récupération des modules
-$stmt = $pdo->query("SELECT * FROM modules ORDER BY name");
+$stmt = $pdo->query("SELECT id, name, description, statut, logo_path, created_at FROM modules ORDER BY name");
 $modules = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
@@ -119,7 +119,11 @@ $modules = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <div class="module-card" data-name="<?= htmlspecialchars($module['name']) ?>" data-status="<?= $module['statut'] ?? 'actif' ?>">
                             <div class="module-header">
                                 <div class="module-icon">
-                                    <i class="fas fa-cog"></i>
+                                    <?php if (!empty($module['logo_path']) && file_exists('../../../' . $module['logo_path'])): ?>
+                                        <img src="../../../<?= htmlspecialchars($module['logo_path']) ?>" alt="Logo <?= htmlspecialchars($module['name']) ?>" style="width:40px; height:40px; object-fit:contain;">
+                                    <?php else: ?>
+                                        <i class="fas fa-cog"></i>
+                                    <?php endif; ?>
                                 </div>
                                 <div class="module-status <?= ($module['statut'] ?? 'actif') === 'actif' ? 'active' : 'inactive' ?>">
                                     <?= ($module['statut'] ?? 'actif') === 'actif' ? 'Actif' : 'Inactif' ?>
@@ -141,13 +145,9 @@ $modules = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <button class="btn btn-sm btn-secondary" onclick="editModule(<?= $module['id'] ?>)">
                                     <i class="fas fa-edit"></i> Modifier
                                 </button>
-                                <form action="../../../app/controlleurs/AdminController.php" method="POST" style="display:inline-block;">
-                                    <input type="hidden" name="action" value="deleteModule">
-                                    <input type="hidden" name="module_id" value="<?= $module['id'] ?>">
-                                    <button type="submit" class="btn btn-sm btn-danger">
-                                        <i class="fas fa-trash"></i> Supprimer
-                                    </button>
-                                </form>
+                                <button class="btn btn-sm btn-danger" onclick="confirmDeleteModule(<?= $module['id'] ?>, '<?= htmlspecialchars($module['name'], ENT_QUOTES) ?>')">
+                                    <i class="fas fa-trash"></i> Supprimer
+                                </button>
                             </div>
                         </div>
                         <?php endforeach; ?>
@@ -274,6 +274,31 @@ $modules = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 closeModuleModal();
             }
         });
+
+        // Fonction de confirmation de suppression
+        function confirmDeleteModule(moduleId, moduleName) {
+            if (confirm(`Voulez-vous vraiment supprimer le module "${moduleName}" ?\n\nCette action est irréversible et supprimera définitivement le module.`)) {
+                // Créer un formulaire temporaire pour soumettre la suppression
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '../../../app/controlleurs/AdminController.php';
+                
+                const actionInput = document.createElement('input');
+                actionInput.type = 'hidden';
+                actionInput.name = 'action';
+                actionInput.value = 'deleteModule';
+                
+                const moduleIdInput = document.createElement('input');
+                moduleIdInput.type = 'hidden';
+                moduleIdInput.name = 'module_id';
+                moduleIdInput.value = moduleId;
+                
+                form.appendChild(actionInput);
+                form.appendChild(moduleIdInput);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
     </script>
 </body>
 </html>
