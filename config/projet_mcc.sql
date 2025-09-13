@@ -97,6 +97,8 @@ CREATE TABLE `modules` (
   `id` int(11) NOT NULL,
   `name` varchar(100) NOT NULL,
   `description` text DEFAULT NULL,
+  `statut` enum('actif','inactif') DEFAULT 'actif',
+  `logo_path` varchar(255) DEFAULT NULL,
   `created_by` int(11) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -105,11 +107,10 @@ CREATE TABLE `modules` (
 -- Déchargement des données de la table `modules`
 --
 
-INSERT INTO `modules` (`id`, `name`, `description`, `created_by`, `created_at`) VALUES
-(1, 'RVE', 'Radio Vox Ecclesia', NULL, '2025-08-29 10:04:55'),
-(2, 'Imprimerie', 'Service Imprimerie', NULL, '2025-08-29 10:04:55'),
-(3, 'SerCom', 'Service Communication', NULL, '2025-08-29 10:04:55'),
-(4, 'Luma Vitae', 'Service Luma Vitae', NULL, '2025-08-29 10:04:55');
+INSERT INTO `modules` (`id`, `name`, `description`, `statut`, `logo_path`, `created_by`, `created_at`) VALUES
+(1, 'RVE', 'Radio Vox Ecclesia', 'actif', 'Images/logo RVE.jpg', NULL, '2025-08-29 10:04:55'),
+(2, 'Imprimerie', 'Service Imprimerie', 'actif', 'Images/Logo Imprimerie.png', NULL, '2025-08-29 10:04:55'),
+(3, 'SerCom', 'Service Communication', 'actif', 'Images/Logo SerCom.png', NULL, '2025-08-29 10:04:55');
 
 -- --------------------------------------------------------
 

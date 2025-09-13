@@ -26,7 +26,7 @@ L'interface d'administration du projet MCC est une solution complète de gestion
 - **Formats supportés** : JPG, PNG, GIF, MP4, MP3, WAV, AVI
 
 ### 🏗️ Organisation par modules et catégories
-- **Modules** : RVE, Imprimerie, SerCom, Luma Vitae
+- **Modules** : RVE, Imprimerie, SerCom
 - **Catégories** : Actualités, Émissions, Publications, Albums photos
 - **Navigation intuitive** par module
 - **Filtrage et recherche** avancés

@@ -40,6 +40,7 @@ if ($action === 'edit' && isset($_GET['id'])) {
     <title>Administration MCC - <?php echo $action === 'create' ? 'Nouvelle publication' : 'Modifier publication'; ?></title>
     <link rel="stylesheet" href="../../../public/assets/css/admin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="../../../public/assets/js/admin-mobile.js"></script>
     <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
 </head>
 <body class="admin-publication-form">
@@ -104,10 +105,16 @@ if ($action === 'edit' && isset($_GET['id'])) {
                 </a>
             </div>
         </aside>
+
+        <!-- Mobile menu overlay -->
+        <div class="sidebar-overlay" onclick="closeMobileMenu()"></div>
         
         <!-- Main Content -->
         <main class="admin-main">
             <header class="admin-header">
+                <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars"></i>
+                </button>
                 <div class="header-content">
                     <h1><?php echo $action === 'create' ? 'Nouvelle publication' : 'Modifier publication'; ?></h1>
                     <p>Créer ou modifier le contenu d'une publication</p>

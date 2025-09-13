@@ -31,6 +31,7 @@ $publications = $publicationsQuery->fetchAll(PDO::FETCH_ASSOC);
     <title>Administration MCC - Gestion des Médias</title>
     <link rel="stylesheet" href="../../../public/assets/css/admin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="../../../public/assets/js/admin-mobile.js"></script>
 </head>
 <body class="admin-media">
     <div class="admin-layout">
@@ -94,10 +95,16 @@ $publications = $publicationsQuery->fetchAll(PDO::FETCH_ASSOC);
                 </a>
             </div>
         </aside>
+
+        <!-- Mobile menu overlay -->
+        <div class="sidebar-overlay" onclick="closeMobileMenu()"></div>
         
         <!-- Main Content -->
         <main class="admin-main">
             <header class="admin-header">
+                <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars"></i>
+                </button>
                 <div class="header-content">
                     <h1>Gestion des Médias</h1>
                     <p>Télécharger, organiser et gérer les fichiers multimédias</p>

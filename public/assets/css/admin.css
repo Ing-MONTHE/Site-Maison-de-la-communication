@@ -1391,3 +1391,28 @@ html, body {
         max-width: none;
     }
 }
+
+/* Styles pour l'aperçu du logo */
+.logo-preview {
+    margin-top: 10px;
+    padding: 10px;
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    text-align: center;
+}
+
+.logo-preview img {
+    max-width: 100px;
+    max-height: 100px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.form-help {
+    display: block;
+    margin-top: 5px;
+    font-size: 0.875rem;
+    color: #666;
+    font-style: italic;
+}

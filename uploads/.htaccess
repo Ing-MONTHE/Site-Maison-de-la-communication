@@ -1,0 +1,15 @@
+# Sécurité pour le dossier uploads
+<Files "*.php">
+    Order Deny,Allow
+    Deny from all
+</Files>
+
+# Autoriser seulement les images
+<FilesMatch "\.(jpg|jpeg|png|gif)$">
+    Order Allow,Deny
+    Allow from all
+</FilesMatch>
+
+# Bloquer l'exécution de scripts
+Options -ExecCGI
+AddHandler cgi-script .php .pl .py .jsp .asp .sh .cgi

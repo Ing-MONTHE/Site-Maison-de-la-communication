@@ -427,8 +427,19 @@ class AdminController {
         }
         
         try {
-            // Associer automatiquement le logo correspondant
-            $logoPath = $this->getModuleLogoPath($nom);
+            $logoPath = null;
+            
+            // Gérer l'upload du logo si un fichier est fourni
+            if (isset($_FILES['logo']) && $_FILES['logo']['error'] === UPLOAD_ERR_OK) {
+                $logoPath = $this->handleLogoUpload($_FILES['logo'], $nom);
+                if (!$logoPath) {
+                    header('Location: ../views/admin/modules.php?error=Erreur lors de l\'upload du logo');
+                    return;
+                }
+            } else {
+                // Associer automatiquement le logo correspondant s'il existe
+                $logoPath = $this->getModuleLogoPath($nom);
+            }
             
             if ($this->hasModuleStatus()) {
                 $stmt = $this->db->prepare("INSERT INTO modules (name, description, statut, logo_path, created_at) VALUES (?, ?, ?, ?, NOW())");
@@ -461,13 +472,36 @@ class AdminController {
         }
         
         try {
-            if ($this->hasModuleStatus() && $statut !== null) {
-                $stmt = $this->db->prepare("UPDATE modules SET name = ?, description = ?, statut = ? WHERE id = ?");
-                $stmt->execute([$nom, $description, $statut, $id]);
-            } else {
-                $stmt = $this->db->prepare("UPDATE modules SET name = ?, description = ? WHERE id = ?");
-                $stmt->execute([$nom, $description, $id]);
+            $logoPath = null;
+            
+            // Gérer l'upload du logo si un fichier est fourni
+            if (isset($_FILES['logo']) && $_FILES['logo']['error'] === UPLOAD_ERR_OK) {
+                $logoPath = $this->handleLogoUpload($_FILES['logo'], $nom);
+                if (!$logoPath) {
+                    header('Location: ../views/admin/modules.php?error=Erreur lors de l\'upload du logo');
+                    return;
+                }
             }
+            
+            // Construire la requête SQL selon les champs disponibles
+            $sql = "UPDATE modules SET name = ?, description = ?";
+            $params = [$nom, $description];
+            
+            if ($logoPath) {
+                $sql .= ", logo_path = ?";
+                $params[] = $logoPath;
+            }
+            
+            if ($this->hasModuleStatus() && $statut !== null) {
+                $sql .= ", statut = ?";
+                $params[] = $statut;
+            }
+            
+            $sql .= " WHERE id = ?";
+            $params[] = $id;
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
             
             header('Location: ../views/admin/modules.php?success=Module mis à jour avec succès');
         } catch (Exception $e) {
@@ -540,7 +574,6 @@ class AdminController {
             'RVE' => 'Images/logo RVE.jpg',
             'Imprimerie' => 'Images/Logo Imprimerie.png',
             'SerCom' => 'Images/Logo SerCom.png',
-            'Luma Vitae' => 'Images/Logo Diocese.png', // Logo par défaut pour Luma Vitae
         ];
         
         // Vérifier si le logo existe
@@ -549,7 +582,48 @@ class AdminController {
         }
         
         // Logo par défaut si aucun logo spécifique n'est trouvé
-        return 'Images/Logo Diocese.png';
+        return 'Images/Logo MCC.png';
+    }
+    
+    private function handleLogoUpload($file, $moduleName) {
+        // Vérifier les erreurs d'upload
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            return false;
+        }
+        
+        // Vérifier la taille (2MB max)
+        if ($file['size'] > 2 * 1024 * 1024) {
+            return false;
+        }
+        
+        // Vérifier le type MIME
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mimeType = finfo_file($finfo, $file['tmp_name']);
+        finfo_close($finfo);
+        
+        if (!in_array($mimeType, $allowedTypes)) {
+            return false;
+        }
+        
+        // Créer le dossier d'upload s'il n'existe pas
+        $uploadDir = '../../uploads/modules/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+        
+        // Générer un nom de fichier unique
+        $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+        $safeModuleName = preg_replace('/[^a-zA-Z0-9_-]/', '_', $moduleName);
+        $fileName = $safeModuleName . '_' . time() . '.' . $extension;
+        $filePath = $uploadDir . $fileName;
+        
+        // Déplacer le fichier
+        if (move_uploaded_file($file['tmp_name'], $filePath)) {
+            return 'uploads/modules/' . $fileName;
+        }
+        
+        return false;
     }
     
     private function isAuthenticated() {

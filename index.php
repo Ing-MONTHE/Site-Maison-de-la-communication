@@ -49,7 +49,7 @@ try {
     <div class="container header-inner">
       <a class="brand" href="#">
         <img src="assets/logo-rve.svg" alt="Logo MCC - RVE" onerror="this.style.display='none'" />
-        <img src="Images/Logo Diocese.png" alt="Logo du diocèse" style="height:32px;margin:0 10px" />
+        <img src="Images/Logo MCC.png" alt="Logo MCC" style="height:32px;margin:0 10px" />
         <span>Maison Catholique de la Communication</span>
       </a>
       <nav class="main-nav" aria-label="Navigation principale">
@@ -128,7 +128,7 @@ try {
                 <?php if (!empty($module['logo_path']) && file_exists($module['logo_path'])): ?>
                   <img src="<?php echo htmlspecialchars($module['logo_path']); ?>" alt="<?php echo htmlspecialchars($module['name']); ?>" />
                 <?php else: ?>
-                  <img src="Images/Logo Diocese.png" alt="<?php echo htmlspecialchars($module['name']); ?>" />
+                  <img src="Images/Logo MCC.png" alt="<?php echo htmlspecialchars($module['name']); ?>" />
                 <?php endif; ?>
               </div>
               <h3><?php echo htmlspecialchars($module['name']); ?></h3>

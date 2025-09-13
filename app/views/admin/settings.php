@@ -13,6 +13,7 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
     <title>Administration MCC - Paramètres</title>
     <link rel="stylesheet" href="../../../public/assets/css/admin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="../../../public/assets/js/admin-mobile.js"></script>
 </head>
 <body class="admin-settings">
     <div class="admin-layout">
@@ -76,10 +77,16 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
                 </a>
             </div>
         </aside>
+
+        <!-- Mobile menu overlay -->
+        <div class="sidebar-overlay" onclick="closeMobileMenu()"></div>
         
         <!-- Main Content -->
         <main class="admin-main">
             <header class="admin-header">
+                <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars"></i>
+                </button>
                 <div class="header-content">
                     <h1>Paramètres</h1>
                     <p>Configuration du système et des préférences</p>

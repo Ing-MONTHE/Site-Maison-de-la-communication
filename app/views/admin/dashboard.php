@@ -56,7 +56,7 @@ try {
         <!-- Sidebar -->
         <aside class="admin-sidebar">
             <div class="sidebar-header">
-                <img src="/Site-Maison-de-la-communication/Images/Logo Diocese.png" alt="MCC Logo" class="sidebar-logo">
+                <img src="/Site-Maison-de-la-communication/Images/Logo MCC.png" alt="MCC Logo" class="sidebar-logo">
                 <h3>Administration</h3>
             </div>
             
@@ -257,16 +257,6 @@ try {
                             </div>
                         </div>
                         
-                        <div class="module-card">
-                            <div class="module-icon">
-                                <i class="fas fa-heart"></i>
-                            </div>
-                            <h3>Luma Vitae</h3>
-                            <p>Service Luma Vitae</p>
-                            <div class="module-actions">
-                                <a href="publications.php?module=luma-vitae" class="btn btn-sm">Voir publications</a>
-                            </div>
-                        </div>
                     </div>
                 </section>
                 

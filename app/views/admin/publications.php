@@ -36,6 +36,7 @@ $publications = $publicationsQuery->fetchAll(PDO::FETCH_ASSOC);
     <title>Administration MCC - Publications</title>
     <link rel="stylesheet" href="../../../public/assets/css/admin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="../../../public/assets/js/admin-mobile.js"></script>
 </head>
 <body class="admin-publications">
     <div class="admin-layout">
@@ -99,10 +100,16 @@ $publications = $publicationsQuery->fetchAll(PDO::FETCH_ASSOC);
                 </a>
             </div>
         </aside>
+
+        <!-- Mobile menu overlay -->
+        <div class="sidebar-overlay" onclick="closeMobileMenu()"></div>
         
         <!-- Main Content -->
         <main class="admin-main">
             <header class="admin-header">
+                <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars"></i>
+                </button>
                 <div class="header-content">
                     <h1>Gestion des Publications</h1>
                     <p>Créer, modifier et gérer les contenus du site</p>
@@ -143,19 +150,6 @@ $publications = $publicationsQuery->fetchAll(PDO::FETCH_ASSOC);
                             <input type="text" id="search-filter" class="form-input" placeholder="Rechercher...">
                         </div>
                         
-                        <div class="filter-group">
-                            <label for="sort-by">Trier par</label>
-                            <select id="sort-by" class="form-select">
-                                <option value="date_desc">Date (récent → ancien)</option>
-                                <option value="date_asc">Date (ancien → récent)</option>
-                                <option value="module_asc">Module (A → Z)</option>
-                                <option value="module_desc">Module (Z → A)</option>
-                                <option value="status_asc">Statut (A → Z)</option>
-                                <option value="status_desc">Statut (Z → A)</option>
-                                <option value="title_asc">Titre (A → Z)</option>
-                                <option value="title_desc">Titre (Z → A)</option>
-                            </select>
-                        </div>
                     </div>
                 </section>
                 
@@ -399,12 +393,11 @@ $publications = $publicationsQuery->fetchAll(PDO::FETCH_ASSOC);
             }
         });
 
-        // Tri et filtrage client
-        (function initFiltersAndSort(){
+        // Filtrage client
+        (function initFilters(){
             const moduleFilter = document.getElementById('module-filter');
             const statusFilter = document.getElementById('status-filter');
             const searchFilter = document.getElementById('search-filter');
-            const sortBy = document.getElementById('sort-by');
             const tbody = document.getElementById('publicationsTbody');
 
             function apply(){
@@ -424,38 +417,12 @@ $publications = $publicationsQuery->fetchAll(PDO::FETCH_ASSOC);
                     return matchModule && matchStatus && matchText;
                 });
 
-                // Sort
-                const criterion = sortBy.value;
-                const collator = new Intl.Collator('fr', { sensitivity: 'base' });
-                filtered.sort((a, b) => {
-                    const titleA = a.getAttribute('data-title') || '';
-                    const titleB = b.getAttribute('data-title') || '';
-                    const statusA = a.getAttribute('data-status') || '';
-                    const statusB = b.getAttribute('data-status') || '';
-                    const dateA = new Date(a.getAttribute('data-created'));
-                    const dateB = new Date(b.getAttribute('data-created'));
-                    const moduleA = (a.querySelector('td:nth-child(2) .module-badge')?.textContent || '').trim();
-                    const moduleB = (b.querySelector('td:nth-child(2) .module-badge')?.textContent || '').trim();
-
-                    switch(criterion){
-                        case 'date_asc': return dateA - dateB;
-                        case 'date_desc': return dateB - dateA;
-                        case 'module_asc': return collator.compare(moduleA, moduleB);
-                        case 'module_desc': return collator.compare(moduleB, moduleA);
-                        case 'status_asc': return collator.compare(statusA, statusB);
-                        case 'status_desc': return collator.compare(statusB, statusA);
-                        case 'title_desc': return collator.compare(titleB, titleA);
-                        case 'title_asc':
-                        default: return collator.compare(titleA, titleB);
-                    }
-                });
-
                 // Re-attach rows
                 tbody.innerHTML = '';
                 filtered.forEach(tr => tbody.appendChild(tr));
             }
 
-            [moduleFilter, statusFilter, searchFilter, sortBy].forEach(el => el && el.addEventListener('input', apply));
+            [moduleFilter, statusFilter, searchFilter].forEach(el => el && el.addEventListener('input', apply));
         })();
     </script>
 </body>

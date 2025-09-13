@@ -13,7 +13,7 @@
     <div class="container header-inner">
       <a class="brand" href="../../../index.php">
         <img src="../../../assets/logo-rve.svg" alt="Logo MCC - RVE" onerror="this.style.display='none'" />
-        <img src="../../../Images/Logo Diocese.png" alt="Logo du diocèse" style="height:32px;margin:0 10px" />
+        <img src="../../../Images/Logo MCC.png" alt="Logo MCC" style="height:32px;margin:0 10px" />
         <span>Maison Catholique de la Communication</span>
       </a>
       <nav class="main-nav" aria-label="Navigation principale">

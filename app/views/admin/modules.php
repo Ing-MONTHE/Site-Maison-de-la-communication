@@ -198,6 +198,15 @@ $modules = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </select>
                 </div>
 
+                <div class="form-group">
+                    <label for="moduleLogo">Logo du module</label>
+                    <input type="file" id="moduleLogo" name="logo" class="form-input" accept="image/*">
+                    <small class="form-help">Formats acceptés: JPG, PNG, GIF. Taille max: 2MB</small>
+                    <div id="logoPreview" class="logo-preview" style="display: none;">
+                        <img id="previewImage" src="" alt="Aperçu du logo" style="max-width: 100px; max-height: 100px; margin-top: 10px;">
+                    </div>
+                </div>
+
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeModuleModal()">Annuler</button>
                     <button type="submit" class="btn btn-primary">
@@ -216,6 +225,7 @@ $modules = $stmt->fetchAll(PDO::FETCH_ASSOC);
             document.getElementById('moduleId').value = '';
             document.getElementById('moduleForm').reset();
             document.getElementById('moduleStatus').value = 'actif';
+            document.getElementById('logoPreview').style.display = 'none';
             document.getElementById('moduleModal').style.display = 'flex';
         }
 
@@ -231,6 +241,23 @@ $modules = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         document.getElementById('moduleName').value = data.name || '';
                         document.getElementById('moduleDescription').value = data.description || '';
                         document.getElementById('moduleStatus').value = (data.statut || 'actif');
+                        
+                        // Gérer l'affichage du logo existant
+                        const logoInput = document.getElementById('moduleLogo');
+                        const logoPreview = document.getElementById('logoPreview');
+                        const previewImage = document.getElementById('previewImage');
+                        
+                        // Réinitialiser le champ de fichier
+                        logoInput.value = '';
+                        
+                        // Afficher le logo existant s'il existe
+                        if (data.logo_path) {
+                            previewImage.src = '../../../' + data.logo_path;
+                            logoPreview.style.display = 'block';
+                        } else {
+                            logoPreview.style.display = 'none';
+                        }
+                        
                         document.getElementById('moduleModal').style.display = 'flex';
                     } else {
                         alert('Impossible de charger le module.');
@@ -272,6 +299,41 @@ $modules = $stmt->fetchAll(PDO::FETCH_ASSOC);
         window.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 closeModuleModal();
+            }
+        });
+
+        // Gestion de l'aperçu du logo
+        document.getElementById('moduleLogo').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const preview = document.getElementById('logoPreview');
+            const previewImage = document.getElementById('previewImage');
+            
+            if (file) {
+                // Vérifier la taille du fichier (2MB max)
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('Le fichier est trop volumineux. Taille maximum: 2MB');
+                    e.target.value = '';
+                    preview.style.display = 'none';
+                    return;
+                }
+                
+                // Vérifier le type de fichier
+                if (!file.type.startsWith('image/')) {
+                    alert('Veuillez sélectionner un fichier image valide.');
+                    e.target.value = '';
+                    preview.style.display = 'none';
+                    return;
+                }
+                
+                // Afficher l'aperçu
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.style.display = 'none';
             }
         });
 
