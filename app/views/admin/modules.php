@@ -9,8 +9,8 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
 require_once $_SERVER['DOCUMENT_ROOT'] . '/Site-Maison-de-la-communication/config/Database.php';
 $pdo = Config\Database::getConnection();
 
-// Récupération des modules
-$stmt = $pdo->query("SELECT id, name, description, statut, logo_path, created_at FROM modules ORDER BY name");
+// Récupération des modules (sélectionner uniquement les colonnes sûres)
+$stmt = $pdo->query("SELECT id, name, description, created_at FROM modules ORDER BY name");
 $modules = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
@@ -118,15 +118,15 @@ $modules = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <?php foreach ($modules as $module): ?>
                         <div class="module-card" data-name="<?= htmlspecialchars($module['name']) ?>" data-status="<?= $module['statut'] ?? 'actif' ?>">
                             <div class="module-header">
-                                <div class="module-icon">
-                                    <?php if (!empty($module['logo_path']) && file_exists('../../../' . $module['logo_path'])): ?>
+                        <div class="module-icon">
+                                    <?php if (isset($module['logo_path']) && !empty($module['logo_path']) && file_exists('../../../' . $module['logo_path'])): ?>
                                         <img src="../../../<?= htmlspecialchars($module['logo_path']) ?>" alt="Logo <?= htmlspecialchars($module['name']) ?>" style="width:40px; height:40px; object-fit:contain;">
                                     <?php else: ?>
                                         <i class="fas fa-cog"></i>
                                     <?php endif; ?>
                                 </div>
-                                <div class="module-status <?= ($module['statut'] ?? 'actif') === 'actif' ? 'active' : 'inactive' ?>">
-                                    <?= ($module['statut'] ?? 'actif') === 'actif' ? 'Actif' : 'Inactif' ?>
+                                <div class="module-status <?= (($module['statut'] ?? 'actif') === 'actif') ? 'active' : 'inactive' ?>">
+                                    <?= (($module['statut'] ?? 'actif') === 'actif') ? 'Actif' : 'Inactif' ?>
                                 </div>
                             </div>
                             <div class="module-content">
@@ -207,7 +207,7 @@ $modules = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </div>
                 </div>
 
-                <div class="form-actions">
+                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeModuleModal()">Annuler</button>
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save"></i> Enregistrer
